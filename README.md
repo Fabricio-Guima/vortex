@@ -23,44 +23,89 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 
 ## Learning Laravel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+rode o comando:
+composer install
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Configurar a conexão com o banco de dados mysql:
+DB_DATABASE=nomeDobanco
+DB_USERNAME=seuUser
+DB_PASSWORD=suaSenha.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Rodar o comando para criar as tabelas no banco:
+php artisan migrate
 
-## Laravel Sponsors
+Rodar o comando para criar a tabela de jobs:
+php artisan queue:table
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Considerando que você saiba docker e que você fez toda a configuração bonitinha do arquivo docker-compose.yml, rode o comando para criar um container do redis:
+docker run --name redis -p 6379:6379 -d redis
 
-### Premium Partners
+suba o servidor com comando:
+php artisan serve
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Abra um outro terminal para a fila de jobs processar e digite:
+php artisan queue:work
 
-## Contributing
+acesse a rota:
+http://localhost:8000/agendar
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+envie um objeto do tipo para a rota acima:
+{
+    "nome": "Fabrício teste",
+    "email": "teste@gmail.com",
+    "assunto": "Envio teste",
+    "corpo_email": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo quas cupiditate accusantium vitae facilis cumque, vel ab. Fuga odio natus nemo mollitia perspiciatis minus fugit.",
+    "agendar": "2022-10-05 00:32:57"
+}
 
-## Code of Conduct
+caso vc deixe em branco o campo agendar ("agendar": ""), o email cairá na fila e será disparado, caso contrário o scheduling irá monitorar a tabela de 1 em um minuto e irá verificar se o campo enviado é true ou false, se for false e se  campo "agendar" for menor ou igual a data de agora (now()), pegue esse registro e envie para a fila de processamento para este email ser disparado.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+A fila irá tentar disparar cada email 3x se necessário.
 
-## Security Vulnerabilities
+agora rode o próximo comando que é o agendador (scheduling):
+php artisan schedule:run
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+se tudo der certo, vc irá ver os jobs sendo processados (done) no terminal onde vc tem a fila
 
-## License
+mas para que o cron rode o nosso command que monitora a tabela "agendas" de um em um minuto, faça os seguintes passos
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+edite o arquivo crontab que fica dentro de /etc usando o vim:
+vim /etc/crontab
+
+fique atento a identação do arquivo e escreva isso nele:
+* * * * * root cd /shared/httpd/artisan && php artisan schedule:run >> /dev/null 2>&1
+
+agora starte a cron com o comando (em um outro terminal):
+service cron start
+
+agora use o comando para verificar se de fato a cron está rodando:
+service cron status
+
+e acho que isso é tudo!
+
+Bônus para quem usa windows e está com problemas de usar o docker:
+instale o redis versão 3.0.5
+
+reinicie a máquina
+
+no terminal, digite:
+redis-cli
+
+agora digite:
+ping
+você receberá uma resposta "PONG"
+
+na raiz do projeto laravel, rode o comando para instalar o predis:
+composer require predis/predis=v1.1.7
+
+agora, vá em .env e crie a constante:
+REDIS_CLIENT=predis
+
+vou ficar devendo como que faz um cron no ruindos (windows).
+mas ao rodar apenas o comando:
+php artisan schedule:run
+
+Tu verás que os email serão disparados, mas infelizmente será de forma manual : (
+
+
+
