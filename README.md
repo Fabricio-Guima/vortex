@@ -52,6 +52,7 @@ edite o arquivo crontab que fica dentro de /etc usando o vim:
 vim /etc/crontab
 
 fique atento a identação do arquivo e escreva isso nele:
+Obs: cada elemento visual aqui é um asterisco,entao coloque asterisco e coloque o path do seu projeto ali depois de "cd"!
 * * * * * root cd /shared/httpd/artisan && php artisan schedule:run >> /dev/null 2>&1
 
 agora starte a cron com o comando (em um outro terminal):
