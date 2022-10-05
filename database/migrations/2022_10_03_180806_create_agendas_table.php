@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('email');
             $table->string('assunto');
             $table->string('corpo_email');
-            $table->dateTime('agendar');
+            $table->dateTime('agendar')->nullable();
+            $table->boolean('enviado')->default(false);
             $table->timestamps();
         });
     }

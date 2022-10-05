@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Events\TriggerEmailEvent;
 use App\Models\Agenda;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,6 +23,7 @@ class SendEmailMessage extends Mailable implements ShouldQueue
     public function __construct(Agenda $agenda)
     {
         $this->agenda = $agenda;
+        dd($this->agenda);
     }
 
     /**

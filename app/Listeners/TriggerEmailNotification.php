@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\TriggerEmailEvent;
+use App\Jobs\SendEmailJob;
 use App\Mail\SendEmailMessage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -27,6 +28,6 @@ class TriggerEmailNotification
      */
     public function handle(TriggerEmailEvent $event)
     {
-        Mail::to($event->agenda->email)->send(new SendEmailMessage($event->agenda));
+        SendEmailJob::dispatch($event);
     }
 }

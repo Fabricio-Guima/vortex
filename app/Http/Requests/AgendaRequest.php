@@ -27,7 +27,7 @@ class AgendaRequest extends FormRequest
             'nome' => ['required', 'string', 'min:1', 'max:255',],
             'email' => ['required', 'email'],
             'assunto' => ['required', 'string', 'min:1', 'max:255'],
-            'corpo_email' => ['required', 'string', 'min:1', 'max:10000'],
+            'corpo_email' => ['required', 'string', 'min:1', 'max:255'],
             'agendar' => ['nullable', 'date_format:Y-m-d H:i:s']
         ];
     }

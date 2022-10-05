@@ -4,8 +4,11 @@ namespace App\Console\Commands;
 
 use App\Mail\SendEmailMessage;
 use App\Models\Agenda;
+use App\Notifications\SendEmailMessageNotification;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
+
+use function GuzzleHttp\Promise\each;
 
 class SendReportEmail extends Command
 {
@@ -40,15 +43,15 @@ class SendReportEmail extends Command
      */
     public function handle()
     {
-        // $agenda = [
-        //     'email' => 'fsgkof@gmail.com',
-        //     'nome' => 'kkkkkkk',
-        //     'assunto' => 'Assunto',
-        //     'corpo_email' => 'dgdhhjghjghjkdofkjsdoifjsdifjsidofjsdoifjsdiofjsdifjsdoifj'
-        // ];
-        $agenda = Agenda::first();
+        $delay = now()->addMinutes(1);
 
+        Agenda::all()->each(
+            function (Agenda $agenda) use ($delay) {
+                $agenda->notify((new SendEmailMessageNotification($agenda))->delay($delay));
+                $agenda->enviado = true;
+                $agenda->save();
+            }
 
-        Mail::to($agenda->email)->send(new SendEmailMessage($agenda));
+        );
     }
 }
